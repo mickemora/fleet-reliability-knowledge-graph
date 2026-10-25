@@ -116,7 +116,6 @@ class FleetAppStack(Stack):
             self, "Cdn",
             comment="Fleet Reliability Explorer",
             default_root_object="index.html",
-            minimum_protocol_version=cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
             default_behavior=cloudfront.BehaviorOptions(
                 origin=origins.S3BucketOrigin.with_origin_access_control(site),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,

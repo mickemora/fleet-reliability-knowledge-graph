@@ -29,7 +29,7 @@ jobs:
           pytest -q -rs tests/test_stacks.py | tee /tmp/stack-tests.txt
           ! grep -q SKIP /tmp/stack-tests.txt
       - name: CDK synth (environment-agnostic, no AWS credentials needed)
-        run: cdk synth --all --quiet 2>&1 | tee ci-step.log
+        run: cdk synth --quiet 2>&1 | tee ci-step.log
       - name: Lambda bundles are complete
         run: |
           test -f build/lambda/core/functions/admin/handler.py
@@ -37,9 +37,9 @@ jobs:
           test -f build/lambda/rdf/fleet_kg/lakehouse.py
           test -d build/lambda/rdf/rdflib && test -d build/lambda/rdf/pyshacl
           test -f build/lambda/rdf/ontology/fleet.ttl
+          du -sh build/lambda/*
       - name: Glue script compiles
         run: python -m py_compile glue/delta_export.py
-          du -sh build/lambda/*
       - name: Local explorer smoke test
         run: |
           python scripts/serve_local.py --port 8765 > ci-step.log 2>&1 &
