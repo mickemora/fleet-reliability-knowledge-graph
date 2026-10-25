@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fleet Reliability Connectivity Pilot</title>
+<!-- Source of docs/images/pilot-infographic.jpg. Render: python scripts/render_infographic.py -->
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1600px; height: 790px; font: 13px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; background: #eef3f9; }
+  .hero { height: 168px; padding: 18px 34px; color: #fff; position: relative; overflow: hidden;
+          background: linear-gradient(115deg, #0b1f3f 0%, #12325f 48%, #1c4f8a 78%, #f2a541 140%); }
+  .hero::after { content: ""; position: absolute; right: -60px; top: 40px; width: 720px; height: 260px;
+          border-top: 3px dashed rgba(255,255,255,.35); border-radius: 50%; transform: rotate(-8deg); }
+  .plane { position: absolute; right: 250px; top: 22px; width: 70px; height: 70px; transform: rotate(35deg); fill: rgba(255,255,255,.9); }
+  .eyebrow { letter-spacing: .3em; font-size: 12px; opacity: .85; font-weight: 600; }
+  h1 { font-size: 46px; line-height: 1.05; margin: 6px 0 6px; letter-spacing: -.01em; }
+  .sub { letter-spacing: .22em; font-size: 13px; font-weight: 600; opacity: .9; }
+  .lede { font-size: 15px; margin-top: 8px; max-width: 980px; opacity: .95; }
+  .verbs { position: absolute; right: 34px; bottom: 16px; text-align: right; font-weight: 700; letter-spacing: .14em; font-size: 13px; line-height: 1.5; }
+  .row { display: grid; gap: 10px; padding: 0 14px; }
+  .top { grid-template-columns: 1fr 1fr 1.25fr 1fr; margin-top: 10px; }
+  .card { background: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: 0 1px 3px rgba(15,36,71,.1); }
+  .card h3 { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #12325f; margin-bottom: 5px; }
+  .card.green { background: #edf7ec; } .card.green h3 { color: #2f7d32; }
+  ol, ul { padding-left: 18px; } li { margin: 2px 0; }
+  .check li { list-style: "✓  "; }
+  .weeks { grid-template-columns: repeat(6, 1fr); margin-top: 10px; gap: 6px; }
+  .wk { border-radius: 10px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgba(15,36,71,.1); }
+  .wk header { color: #fff; padding: 7px 10px; font-weight: 700; font-size: 13px; }
+  .wk header span { display: block; font-size: 10px; letter-spacing: .14em; opacity: .85; font-weight: 600; }
+  .wk .body { padding: 7px 10px; font-size: 11.5px; }
+  .wk .del { background: #f4f7fb; margin: 0 8px 8px; padding: 6px 8px; border-radius: 6px; font-size: 11px; }
+  .wk .del b { color: #12325f; }
+  .w1 header { background: #12325f; } .w2 header { background: #1d4f8f; } .w3 header { background: #1f6b7a; }
+  .w4 header { background: #2f7d5b; } .w5 header { background: #4f7f2f; } .w6 header { background: #a97a1a; }
+  .bottom { grid-template-columns: 1.05fr 1.15fr 1fr 0.85fr; margin-top: 10px; }
+  .ont { position: relative; height: 196px; }
+  .n { position: absolute; padding: 4px 8px; border-radius: 6px; background: #e8f0fe; border: 1px solid #b8cdf3; font-weight: 600; font-size: 11.5px; white-space: nowrap; }
+  .n.c { background: #12325f; color: #fff; border-color: #12325f; }
+  svg.lines { position: absolute; inset: 0; }
+  .arch div.l { border-radius: 8px; padding: 5px 9px; margin-bottom: 5px; font-size: 11.5px; }
+  .arch b { display: block; font-size: 12px; }
+  .l1 { background: #efe9fb; } .l2 { background: #e6eefb; } .l4 { background: #eef2f6; }
+  .l3 { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 5px; }
+  .l3 > div { border-radius: 8px; padding: 5px 8px; font-size: 11px; }
+  .shot { width: 100%; height: 205px; object-fit: cover; object-position: 30% 35%; border-radius: 8px; border: 1px solid #cbd5e1; }
+  .out li { margin: 4px 0; }
+  .db { background: #fff4ec !important; border: 1px solid #ffd2b0; }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <svg class="plane" viewBox="0 0 24 24"><path d="M12 2.5c.9 0 1.4 1 1.4 2.3v4.6l7.6 4.4v2l-7.6-2.3v4.6l2.2 1.7v1.6L12 20.4l-3.6 1v-1.6l2.2-1.7v-4.6L3 15.8v-2l7.6-4.4V4.8c0-1.3.5-2.3 1.4-2.3z"/></svg>
+    <div class="eyebrow">FROM DISCONNECTED DATA TO CONNECTED INSIGHTS</div>
+    <h1>Fleet Reliability Connectivity Pilot</h1>
+    <div class="sub">A 6-WEEK JOURNEY TO A MORE RELIABLE, MORE CONNECTED MAINTENANCE &amp; ENGINEERING ORGANIZATION</div>
+    <p class="lede">Show how one shared ontology connects defects, deferrals, work orders, serialized components, repair shops and flights, in a knowledge graph on Amazon Neptune and governed lakehouse tables for Databricks, to find reliability problems faster.</p>
+    <div class="verbs">CONNECT<br>UNDERSTAND<br>EXPLORE<br>ACCELERATE<br>CREATE VALUE</div>
+  </section>
+
+  <div class="row top">
+    <div class="card"><h3>Business problem</h3>
+      Defects, deferrals, work orders, component removals, shop findings and delays live in separate systems. Linking a write-up to the unit removed, the shop that repaired it and the flights it delayed takes hours, so rogue units and weak fixes are found late.</div>
+    <div class="card"><h3>Pilot objectives</h3>
+      <ol><li>Deliver a tangible reliability use case</li><li>Build organizational knowledge and momentum</li><li>One logical model for the graph <i>and</i> the lakehouse</li></ol></div>
+    <div class="card green"><h3>Target use case: Fleet Reliability Explorer</h3>
+      “Enable reliability engineers and maintenance control to follow any defect to its aircraft, deferral, work order, removed unit, repair shop and operational impact, through a unified ontology.”</div>
+    <div class="card"><h3>Success criteria</h3>
+      <ul class="check"><li>Validated concepts and relationships</li><li>10 competency questions answered</li><li>Graph and Delta tables from one ontology</li><li>Stakeholder demonstration</li><li>Clear path for expansion</li></ul></div>
+  </div>
+
+  <div class="row weeks">
+    <div class="wk w1"><header><span>WEEK 1</span>Business Discovery</header>
+      <div class="body">Workshop with reliability, MCC and engineering SMEs; key questions; data approach.</div>
+      <div class="del"><b>Deliverables:</b> problem statement · 10 competency questions · plan</div></div>
+    <div class="wk w2"><header><span>WEEK 2</span>Ontology Modeling</header>
+      <div class="body">Glossary, classes, relationships, ATA taxonomy, SHACL rules; review.</div>
+      <div class="del"><b>Deliverables:</b> conceptual model · RDF/OWL/SHACL · glossary</div></div>
+    <div class="wk w3"><header><span>WEEK 3</span>Graph &amp; Lakehouse</header>
+      <div class="body">Synthetic year of operations; validate; load Neptune; write Delta tables.</div>
+      <div class="del"><b>Deliverables:</b> Neptune graph · Delta tables · DQ report</div></div>
+    <div class="wk w4"><header><span>WEEK 4</span>Query &amp; Validation</header>
+      <div class="body">SPARQL and Databricks SQL answer the same questions; SME review.</div>
+      <div class="del"><b>Deliverables:</b> 10 validated queries · results · sign-off</div></div>
+    <div class="wk w5"><header><span>WEEK 5</span>User Experience</header>
+      <div class="body">Explorer UI, workflows, NLQ on Bedrock; Unity Catalog metric views.</div>
+      <div class="del"><b>Deliverables:</b> explorer · workflows · metric views</div></div>
+    <div class="wk w6"><header><span>WEEK 6</span>Demo &amp; Evaluation</header>
+      <div class="body">End-to-end demo, measure against criteria, lessons, roadmap.</div>
+      <div class="del"><b>Deliverables:</b> demo · impact · next phase</div></div>
+  </div>
+
+  <div class="row bottom">
+    <div class="card"><h3>Sample fleet ontology (v1)</h3>
+      <div class="ont">
+        <svg class="lines" viewBox="0 0 360 196"><g stroke="#94a3b8" stroke-width="1.5" fill="none">
+          <path d="M180 92 L60 40"/><path d="M180 92 L300 40"/><path d="M180 92 L60 150"/><path d="M180 92 L300 150"/>
+          <path d="M180 92 L180 22"/><path d="M300 150 L300 182"/><path d="M60 150 L60 182"/><path d="M300 40 L330 92"/></g></svg>
+        <div class="n" style="left:28px;top:30px">Aircraft</div>
+        <div class="n" style="left:262px;top:30px">Work Order</div>
+        <div class="n" style="left:148px;top:10px">Station</div>
+        <div class="n c" style="left:150px;top:80px">Defect</div>
+        <div class="n" style="left:20px;top:140px">MEL Deferral</div>
+        <div class="n" style="left:270px;top:140px">Flight</div>
+        <div class="n" style="left:286px;top:84px">Removal</div>
+        <div class="n" style="left:8px;top:174px">ATA chapter</div>
+        <div class="n" style="left:168px;top:174px">Component → Part → Vendor</div>
+      </div></div>
+    <div class="card arch"><h3>Technical architecture (100% AWS CDK)</h3>
+      <div class="l l1"><b>Fleet Reliability Explorer</b>CloudFront · relationship graph · competency questions · NLQ</div>
+      <div class="l l2"><b>Application &amp; AI services</b>API Gateway · Lambda · Amazon Bedrock (Claude Sonnet 4.5)</div>
+      <div class="l3"><div class="l2">Ontology<br><b>RDF · OWL · SHACL</b></div><div class="l2">Knowledge graph<br><b>Amazon Neptune</b></div>
+        <div class="db">Lakehouse<br><b>Delta · Glue · Unity Catalog</b></div></div>
+      <div class="l l4" style="margin-top:5px"><b>Validated pipeline (Step Functions)</b>CSV → RDF → SHACL → graph ∥ Delta</div></div>
+    <div class="card"><h3>Example user experience</h3><img class="shot" src="../images/explorer-defect.png" alt=""></div>
+    <div class="card out"><h3>Expected outcomes</h3>
+      <ul><li>Rogue units and weak shops found in minutes</li><li>One definition of defect, removal and MTBUR across graph and lakehouse</li><li>Fewer repeat defects and delays</li><li>Governed KPIs in Unity Catalog</li><li>Foundation for predictive reliability</li></ul></div>
+  </div>
+</body>
+</html>

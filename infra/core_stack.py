@@ -254,7 +254,7 @@ class FleetCoreStack(Stack):
                     update_behavior="UPDATE_IN_DATABASE", delete_behavior="LOG"))
             crawler.add_dependency(database)
             athena.CfnWorkGroup(
-                self, "AthenaWorkGroup", name=f"{glue_database}-wg", recursive_delete_option=True,
+                self, "AthenaWg", name=f"{glue_database}-wg", recursive_delete_option=True,
                 description="Query the fleet reliability Delta tables",
                 work_group_configuration=athena.CfnWorkGroup.WorkGroupConfigurationProperty(
                     result_configuration=athena.CfnWorkGroup.ResultConfigurationProperty(
