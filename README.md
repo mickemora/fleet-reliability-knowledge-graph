@@ -12,7 +12,7 @@ end to end with the **AWS CDK (Python)**:
 ![Fleet Reliability Connectivity Pilot: a 6-week journey to a more reliable, more connected maintenance and engineering organization](docs/images/pilot-infographic.jpg)
 
 > All data is synthetic: one year of operations for 160 Boeing 737s of a fictional airline,
-> "Bluebonnet Air" (flights BB…, tails N…BB). Vendors, part numbers and airworthiness directives
+> "Bluebonnet Air." (flights BB…, tails N…BB). Vendors, part numbers and airworthiness directives
 > are fictional. Airport codes, aircraft and engine types, and ATA chapter numbers are real
 > industry references. Not affiliated with any airline.
 
