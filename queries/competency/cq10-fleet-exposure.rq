@@ -1,0 +1,26 @@
+# id: cq10
+# title: Fleet exposure to a repair shop
+# question: Which aircraft are flying today with a unit of a part last repaired by a given shop since a given date?
+# value: Sizes a targeted removal campaign and tells maintenance control which tails to watch.
+# param: partNumber | string | ^[0-9A-Z]{3,10}-[0-9A-Z]{1,6}$ | BV3611-04
+# param: vendorCode | string | ^V[0-9]{2}$ | V05
+# param: shopFrom | date | ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ | 2025-03-01
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?tailNumber ?model ?homeBase ?serialNumber ?lastShopVisit ?removalsThisYear
+WHERE {
+  VALUES ?partNumber { "BV3611-04" }
+  VALUES ?vendorCode { "V05" }
+  VALUES ?shopFrom { "2025-03-01"^^xsd:date }
+  ?p fro:partNumber ?partNumber .
+  ?v fro:vendorCode ?vendorCode .
+  ?u fro:ofPart ?p ; fro:lastRepairedBy ?v ; fro:lastShopVisitDate ?lastShopVisit ;
+     fro:installedOn ?a ; fro:serialNumber ?serialNumber .
+  FILTER(?lastShopVisit >= ?shopFrom)
+  ?a fro:tailNumber ?tailNumber ; fro:aircraftModel ?model ; fro:homeBase/fro:stationCode ?homeBase .
+  OPTIONAL { { SELECT ?u (COUNT(?r) AS ?removalsThisYear) WHERE { ?r fro:removedUnit ?u } GROUP BY ?u } }
+}
+ORDER BY DESC(?removalsThisYear) ?tailNumber

@@ -1,0 +1,172 @@
+@prefix fro:  <https://fleet.example.com/ontology#> .
+@prefix frs:  <https://fleet.example.com/shapes#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+#################################################################################################
+# SHACL shapes: the business rules a maintenance record must satisfy before it enters the graph
+# (and the lakehouse). sh:Violation blocks the load; sh:Warning is reported only.
+# Neptune does not enforce SHACL: the pipeline's validate step runs these with pySHACL.
+#################################################################################################
+
+frs: sh:declare [ sh:prefix "fro" ; sh:namespace "https://fleet.example.com/ontology#"^^xsd:anyURI ] .
+
+frs:AircraftShape a sh:NodeShape ;
+    sh:targetClass fro:Aircraft ;
+    sh:property [ sh:path fro:tailNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^N[0-9]{3}[A-Z]{2}$" ;
+        sh:message "Tail number must be a US registration like N812BB." ] ;
+    sh:property [ sh:path fro:aircraftModel ; sh:minCount 1 ; sh:in ( "737-700" "737-800" "737 MAX 8" ) ;
+        sh:message "Aircraft model must be one of the fleet types." ] ;
+    sh:property [ sh:path fro:homeBase ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Station ;
+        sh:message "Every aircraft has one home base, and it must be a known station." ] ;
+    sh:property [ sh:path fro:flightCycles ; sh:datatype xsd:integer ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path fro:cyclesInPeriod ; sh:minCount 1 ; sh:datatype xsd:integer ; sh:minInclusive 0 ;
+        sh:message "Cycles in the reporting period are required for defect rates." ] ;
+    sh:property [ sh:path fro:flightHours ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] .
+
+frs:DefectShape a sh:NodeShape ;
+    sh:targetClass fro:Defect ;
+    sh:property [ sh:path fro:defectNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^DF-[0-9]{6}$" ;
+        sh:message "Defect number must look like DF-100245." ] ;
+    sh:property [ sh:path fro:defectOn ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Aircraft ;
+        sh:message "A defect must be on exactly one known aircraft." ] ;
+    sh:property [ sh:path fro:reportedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Station ;
+        sh:message "A defect must be reported at one known station." ] ;
+    sh:property [ sh:path fro:inAtaChapter ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:AtaChapter ;
+        sh:message "A defect must be coded to one known ATA chapter." ] ;
+    sh:property [ sh:path fro:hasStatus ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:DefectStatus ] ;
+    sh:property [ sh:path fro:reportedDate ; sh:minCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path fro:reportSource ; sh:in ( "Pilot report" "Maintenance finding" ) ] ;
+    sh:property [ sh:path fro:description ; sh:minCount 1 ; sh:message "A defect needs a description." ] ;
+    sh:sparql [
+        sh:message "A closed defect has no work order correcting it." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this WHERE {
+                $this fro:hasStatus/<http://www.w3.org/2004/02/skos/core#notation> "CLOSED" .
+                FILTER NOT EXISTS { ?wo fro:corrects $this }
+            }""" ] .
+
+frs:DeferralShape a sh:NodeShape ;
+    sh:targetClass fro:Deferral ;
+    sh:property [ sh:path fro:deferralNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^MEL-[0-9]{6}$" ] ;
+    sh:property [ sh:path fro:defers ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Defect ;
+        sh:message "A deferral must defer exactly one known defect." ] ;
+    sh:property [ sh:path fro:melItem ; sh:minCount 1 ; sh:pattern "^[0-9]{2}-[0-9]{2}-[0-9]{2}$" ;
+        sh:message "MEL item must look like 36-11-01." ] ;
+    sh:property [ sh:path fro:melCategory ; sh:minCount 1 ; sh:in ( "A" "B" "C" "D" ) ;
+        sh:message "MEL category must be A, B, C or D." ] ;
+    sh:property [ sh:path fro:deferredDate ; sh:minCount 1 ; sh:datatype xsd:date ;
+        sh:lessThan fro:expiryDate ;
+        sh:message "Deferred date is required and must be before the expiry date." ] ;
+    sh:property [ sh:path fro:expiryDate ; sh:minCount 1 ; sh:datatype xsd:date ] ;
+    sh:sparql [
+        sh:message "The deferral's aircraft is not the aircraft of the defect it defers." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this WHERE {
+                $this fro:deferralOn ?a ; fro:defers ?d . ?d fro:defectOn ?b .
+                FILTER(?a != ?b)
+            }""" ] .
+
+# Severity belongs to the shape, so the warning-level rule gets its own shape.
+frs:DeferralTimelinessShape a sh:NodeShape ;
+    sh:targetClass fro:Deferral ;
+    sh:severity sh:Warning ;
+    sh:sparql [
+        sh:message "Deferral was cleared after it expired ({?cleared} > {?expiry})." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this ?cleared ?expiry WHERE {
+                $this fro:clearedDate ?cleared ; fro:expiryDate ?expiry .
+                FILTER(?cleared > ?expiry)
+            }""" ] .
+
+frs:WorkOrderShape a sh:NodeShape ;
+    sh:targetClass fro:WorkOrder ;
+    sh:property [ sh:path fro:workOrderNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^WO-[0-9]{7}$" ] ;
+    sh:property [ sh:path fro:workOrderOn ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Aircraft ] ;
+    sh:property [ sh:path fro:performedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Station ] ;
+    sh:property [ sh:path fro:openDate ; sh:minCount 1 ; sh:datatype xsd:date ; sh:lessThanOrEquals fro:closeDate ;
+        sh:message "A work order cannot close before it opens." ] ;
+    sh:property [ sh:path fro:laborHours ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 200 ] ;
+    sh:or ( [ sh:path fro:corrects ; sh:minCount 1 ] [ sh:path fro:accomplishes ; sh:minCount 1 ] ) ;
+    sh:sparql [
+        sh:message "The work order is on a different aircraft than the defect it corrects." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this WHERE {
+                $this fro:workOrderOn ?a ; fro:corrects ?d . ?d fro:defectOn ?b .
+                FILTER(?a != ?b)
+            }""" ] ;
+    sh:sparql [
+        sh:message "The work order accomplishes a directive that does not apply to this aircraft model." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this WHERE {
+                $this fro:workOrderOn/fro:aircraftModel ?model ; fro:accomplishes ?ad .
+                FILTER NOT EXISTS { ?ad fro:appliesToModel ?model }
+            }""" ] .
+
+frs:RemovalShape a sh:NodeShape ;
+    sh:targetClass fro:ComponentRemoval ;
+    sh:property [ sh:path fro:removalNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^RM-[0-9]{6}$" ] ;
+    sh:property [ sh:path fro:removedUnit ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:ComponentUnit ;
+        sh:message "A removal must name exactly one known serialized unit." ] ;
+    sh:property [ sh:path fro:removedFrom ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Aircraft ] ;
+    sh:property [ sh:path fro:duringWorkOrder ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:WorkOrder ] ;
+    sh:property [ sh:path fro:afterRepairBy ; sh:maxCount 1 ; sh:class fro:Vendor ] ;
+    sh:property [ sh:path fro:hoursSinceInstall ; sh:minCount 1 ; sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ; sh:message "Hours since install is required and cannot be negative." ] ;
+    sh:property [ sh:path fro:shopFinding ; sh:in ( "Confirmed failure" "No fault found" ) ] .
+
+frs:ComponentShape a sh:NodeShape ;
+    sh:targetClass fro:ComponentUnit ;
+    sh:property [ sh:path fro:serialNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^[A-Z0-9]{4,12}$" ] ;
+    sh:property [ sh:path fro:ofPart ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Part ;
+        sh:message "Every serialized unit is an instance of exactly one known part number." ] ;
+    sh:property [ sh:path fro:lastRepairedBy ; sh:maxCount 1 ; sh:class fro:Vendor ] ;
+    sh:property [ sh:path fro:installedOn ; sh:maxCount 1 ; sh:class fro:Aircraft ;
+        sh:message "A unit can be installed on at most one aircraft." ] .
+
+frs:PartShape a sh:NodeShape ;
+    sh:targetClass fro:Part ;
+    sh:property [ sh:path fro:partNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^[0-9A-Z]{3,10}-[0-9A-Z]{1,6}$" ] ;
+    sh:property [ sh:path fro:inAtaChapter ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:AtaChapter ] ;
+    sh:property [ sh:path fro:manufacturedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Vendor ] ;
+    sh:property [ sh:path fro:unitCost ; sh:datatype xsd:decimal ; sh:minExclusive 0 ] .
+
+frs:VendorShape a sh:NodeShape ;
+    sh:targetClass fro:Vendor ;
+    sh:property [ sh:path fro:vendorCode ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^V[0-9]{2}$" ] ;
+    sh:property [ sh:path fro:vendorType ; sh:minCount 1 ; sh:in ( "OEM" "Repair station" ) ] .
+
+frs:StationShape a sh:NodeShape ;
+    sh:targetClass fro:Station ;
+    sh:property [ sh:path fro:stationCode ; sh:minCount 1 ; sh:maxCount 1 ; sh:pattern "^[A-Z]{3}$" ;
+        sh:message "Station code must be a 3-letter IATA code." ] ;
+    sh:property [ sh:path fro:stationType ; sh:in ( "Line" "Maintenance base" ) ] .
+
+frs:FlightShape a sh:NodeShape ;
+    sh:targetClass fro:FlightLeg ;
+    sh:property [ sh:path fro:flightNumber ; sh:minCount 1 ; sh:pattern "^BB[0-9]{1,4}$" ] ;
+    sh:property [ sh:path fro:operatedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class fro:Aircraft ] ;
+    sh:property [ sh:path fro:departedFrom ; sh:minCount 1 ; sh:class fro:Station ] ;
+    sh:property [ sh:path fro:delayedBy ; sh:minCount 1 ; sh:class fro:Defect ;
+        sh:message "A recorded flight impact must point at the defect that caused it." ] ;
+    sh:property [ sh:path fro:delayMinutes ; sh:datatype xsd:integer ; sh:minInclusive 0 ; sh:maxInclusive 1440 ] ;
+    sh:sparql [
+        sh:message "The flight's aircraft is not the aircraft with the defect that delayed it." ;
+        sh:prefixes frs: ;
+        sh:select """
+            SELECT $this WHERE {
+                $this fro:operatedBy ?a ; fro:delayedBy/fro:defectOn ?b .
+                FILTER(?a != ?b)
+            }""" ] .
+
+frs:DirectiveShape a sh:NodeShape ;
+    sh:targetClass fro:AirworthinessDirective ;
+    sh:property [ sh:path fro:adNumber ; sh:minCount 1 ; sh:pattern "^AD-[0-9]{4}-[0-9]{2}-[0-9]{2}$" ] ;
+    sh:property [ sh:path fro:appliesToModel ; sh:minCount 1 ] ;
+    sh:property [ sh:path fro:effectiveDate ; sh:minCount 1 ; sh:lessThan fro:complianceDate ] .

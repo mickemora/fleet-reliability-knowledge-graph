@@ -1,0 +1,23 @@
+# id: cq05
+# title: Repair shop reliability
+# question: For a part, how long do units last after each repair shop's overhaul, and how often does the shop find no fault?
+# value: Compares vendors on the outcome that matters, hours flown before the next unscheduled removal, and flags shops returning units that still fail.
+# param: partNumber | string | ^[0-9A-Z]{3,10}-[0-9A-Z]{1,6}$ | BV3611-04
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?vendorCode ?vendor ?vendorType (COUNT(?r) AS ?unscheduledRemovals)
+       (ROUND(AVG(?hours)) AS ?meanHoursToRemoval)
+       (ROUND(100 * SUM(IF(?finding = "No fault found", 1, 0)) / COUNT(?r)) AS ?noFaultFoundPct)
+WHERE {
+  VALUES ?partNumber { "BV3611-04" }
+  ?p fro:partNumber ?partNumber .
+  ?u fro:ofPart ?p .
+  ?r fro:removedUnit ?u ; fro:unscheduled true ; fro:hoursSinceInstall ?hours ;
+     fro:shopFinding ?finding ; fro:afterRepairBy ?v .
+  ?v fro:vendorCode ?vendorCode ; rdfs:label ?vendor ; fro:vendorType ?vendorType .
+}
+GROUP BY ?vendorCode ?vendor ?vendorType
+ORDER BY ?meanHoursToRemoval

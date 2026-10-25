@@ -1,0 +1,43 @@
+# id: cq01
+# title: Tail 360
+# question: For one aircraft, what are its open deferrals, its defects in the last six months, the directives it still owes and the serialized units installed on it?
+# value: The morning-meeting view of a tail, assembled from four systems in one query.
+# param: tailNumber | string | ^N[0-9]{3}[A-Z]{2}$ | N812BB
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?section ?item ?detail ?date ?status
+WHERE {
+  VALUES ?tailNumber { "N812BB" }
+  ?a fro:tailNumber ?tailNumber ; fro:aircraftModel ?model .
+  {
+    ?a fro:hasDeferral ?m .
+    ?m fro:deferralNumber ?item ; fro:melItem ?mel ; fro:melCategory ?cat ; fro:expiryDate ?date ;
+       fro:defers/fro:description ?text .
+    FILTER NOT EXISTS { ?m fro:clearedDate ?cleared }
+    BIND("1 Open deferral" AS ?section)
+    BIND(CONCAT("MEL ", ?mel, " cat ", ?cat, ": ", ?text) AS ?detail)
+    BIND("expires" AS ?status)
+  } UNION {
+    ?a fro:hasDefect ?d .
+    ?d fro:defectNumber ?item ; fro:reportedDate ?date ; fro:description ?text ;
+       fro:inAtaChapter/rdfs:label ?chapter ; fro:hasStatus/rdfs:label ?status .
+    FILTER(?date >= "2026-04-01"^^xsd:date)
+    BIND("2 Defect since April" AS ?section)
+    BIND(CONCAT(?chapter, ": ", ?text) AS ?detail)
+  } UNION {
+    ?ad fro:appliesToModel ?model ; fro:adNumber ?item ; fro:title ?detail ; fro:complianceDate ?date .
+    FILTER NOT EXISTS { ?wo fro:accomplishes ?ad ; fro:workOrderOn ?a }
+    BIND("3 Directive not yet accomplished" AS ?section)
+    BIND("due" AS ?status)
+  } UNION {
+    ?a fro:hasInstalledUnit ?u .
+    ?u fro:serialNumber ?item ; fro:ofPart/rdfs:label ?detail ; fro:lastShopVisitDate ?date ;
+       fro:lastRepairedBy/rdfs:label ?vendor .
+    BIND("4 Installed unit" AS ?section)
+    BIND(CONCAT("last shop: ", ?vendor) AS ?status)
+  }
+}
+ORDER BY ?section DESC(?date)

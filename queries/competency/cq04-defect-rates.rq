@@ -1,0 +1,25 @@
+# id: cq04
+# title: Defect rate by system and fleet type
+# question: How many defects per 1,000 departures does each ATA chapter generate, by aircraft model?
+# value: The standard reliability-program rate, rolled up through the ATA taxonomy, so fleet types are compared on the same basis.
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?model ?systemGroup ?chapter (COUNT(?d) AS ?defects) ?departures
+       (ROUND(100000 * COUNT(?d) / ?departures) / 100 AS ?per1000Departures)
+WHERE {
+  {
+    SELECT ?model (SUM(?cycles) AS ?departures) WHERE {
+      ?ac fro:aircraftModel ?model ; fro:cyclesInPeriod ?cycles .
+    } GROUP BY ?model
+  }
+  ?d fro:defectOn ?a ; fro:inAtaChapter ?c ; fro:inSystemGroup ?g .
+  ?a fro:aircraftModel ?model .
+  ?c rdfs:label ?chapter .
+  ?g rdfs:label ?systemGroup .
+}
+GROUP BY ?model ?systemGroup ?chapter ?departures
+ORDER BY DESC(?per1000Departures)
+LIMIT 25

@@ -1,0 +1,28 @@
+# id: cq02
+# title: Repeat defects
+# question: Which aircraft had three or more defects in the same ATA chapter within a 10-day window?
+# value: Repeat ("chronic") defects are the reliability program's first alert; they point to troubleshooting that isn't finding the root cause.
+# param: windowDays | integer | ^[0-9]{1,2}$ | 10
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?tailNumber ?chapter (COUNT(?first) AS ?windows) (MAX(?inWindow) AS ?mostInOneWindow)
+       (MIN(?firstDate) AS ?firstSeen) (MAX(?firstDate) AS ?lastSeen)
+WHERE {
+  {
+    SELECT ?a ?c ?first ?firstDate (COUNT(DISTINCT ?other) AS ?inWindow) WHERE {
+      ?first fro:defectOn ?a ; fro:inAtaChapter ?c ; fro:reportedDayNumber ?n1 ; fro:reportedDate ?firstDate .
+      ?other fro:defectOn ?a ; fro:inAtaChapter ?c ; fro:reportedDayNumber ?n2 .
+      BIND(10 AS ?windowDays)
+      FILTER(?n2 >= ?n1 && ?n2 - ?n1 < ?windowDays)
+    }
+    GROUP BY ?a ?c ?first ?firstDate
+    HAVING (COUNT(DISTINCT ?other) >= 3)
+  }
+  ?a fro:tailNumber ?tailNumber .
+  ?c rdfs:label ?chapter .
+}
+GROUP BY ?tailNumber ?chapter
+ORDER BY DESC(?mostInOneWindow) DESC(?windows)

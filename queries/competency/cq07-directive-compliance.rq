@@ -1,0 +1,19 @@
+# id: cq07
+# title: Directive compliance gap
+# question: Which aircraft does an airworthiness directive apply to that have not accomplished it yet?
+# value: The list engineering needs to schedule before the compliance date; built from model applicability and work-order history, not a spreadsheet.
+# param: adNumber | string | ^AD-[0-9]{4}-[0-9]{2}-[0-9]{2}$ | AD-2026-04-11
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?tailNumber ?model ?homeBase ?title ?complianceDate
+WHERE {
+  VALUES ?adNumber { "AD-2026-04-11" }
+  ?ad fro:adNumber ?adNumber ; fro:title ?title ; fro:complianceDate ?complianceDate ;
+      fro:appliesToModel ?model .
+  ?a fro:aircraftModel ?model ; fro:tailNumber ?tailNumber ; fro:homeBase/fro:stationCode ?homeBase .
+  FILTER NOT EXISTS { ?wo fro:accomplishes ?ad ; fro:workOrderOn ?a }
+}
+ORDER BY ?homeBase ?tailNumber

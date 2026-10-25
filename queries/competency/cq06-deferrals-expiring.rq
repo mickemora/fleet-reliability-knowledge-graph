@@ -1,0 +1,21 @@
+# id: cq06
+# title: Deferrals about to expire
+# question: Which open MEL deferrals expire by a given date, on which aircraft, and where is each aircraft based?
+# value: Maintenance control plans parts and manpower before an expiring deferral grounds an aircraft.
+# param: expiresBy | date | ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ | 2026-10-02
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?deferralNumber ?tailNumber ?melItem ?category ?deferredDate ?expiryDate ?defect ?homeBase
+WHERE {
+  VALUES ?expiresBy { "2026-10-02"^^xsd:date }
+  ?m fro:deferralNumber ?deferralNumber ; fro:melItem ?melItem ; fro:melCategory ?category ;
+     fro:deferredDate ?deferredDate ; fro:expiryDate ?expiryDate ; fro:deferralOn ?a ;
+     fro:defers/fro:description ?defect .
+  FILTER NOT EXISTS { ?m fro:clearedDate ?cleared }
+  FILTER(?expiryDate <= ?expiresBy)
+  ?a fro:tailNumber ?tailNumber ; fro:homeBase/fro:stationCode ?homeBase .
+}
+ORDER BY ?expiryDate

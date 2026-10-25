@@ -1,0 +1,17 @@
+# id: cq09
+# title: Operational impact by ATA chapter
+# question: How many flights, delay minutes and cancellations did maintenance defects cause, by ATA chapter?
+# value: Puts reliability in the operation's terms, connecting engineering priorities to on-time performance.
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?chapter (COUNT(?f) AS ?flightsImpacted) (SUM(?minutes) AS ?delayMinutes)
+       (SUM(IF(?cancelled, 1, 0)) AS ?cancellations)
+WHERE {
+  ?f fro:delayedBy ?d ; fro:delayMinutes ?minutes ; fro:cancelled ?cancelled .
+  ?d fro:inAtaChapter/rdfs:label ?chapter .
+}
+GROUP BY ?chapter
+ORDER BY DESC(?delayMinutes)

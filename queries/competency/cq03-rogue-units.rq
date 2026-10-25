@@ -1,0 +1,25 @@
+# id: cq03
+# title: Rogue units
+# question: Which serialized units were removed three or more times, flying a short time between removals, and who repairs them?
+# value: A rogue unit keeps failing and keeps coming back "no fault found". Pulling it from service stops a cycle of delays that troubleshooting on the aircraft can't fix.
+# param: minRemovals | integer | ^[0-9]{1,2}$ | 3
+# param: maxAvgHours | integer | ^[0-9]{1,6}$ | 1500
+PREFIX fro:  <https://fleet.example.com/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?serialNumber ?part (COUNT(?r) AS ?removals) (COUNT(DISTINCT ?a) AS ?aircraft)
+       (ROUND(AVG(?hours)) AS ?avgHoursSinceInstall)
+       (SUM(IF(?finding = "No fault found", 1, 0)) AS ?noFaultFound) (SAMPLE(?vendor) AS ?lastRepairedBy)
+WHERE {
+  VALUES ?minRemovals { 3 }
+  VALUES ?maxAvgHours { 1500 }
+  ?r fro:removedUnit ?u ; fro:removedFrom ?a ; fro:hoursSinceInstall ?hours ; fro:shopFinding ?finding ;
+     fro:unscheduled true .
+  ?u fro:serialNumber ?serialNumber ; fro:ofPart/rdfs:label ?part .
+  OPTIONAL { ?u fro:lastRepairedBy/rdfs:label ?vendor }
+}
+GROUP BY ?serialNumber ?part ?minRemovals ?maxAvgHours
+HAVING (COUNT(?r) >= ?minRemovals && AVG(?hours) <= ?maxAvgHours)
+ORDER BY DESC(?removals) ?avgHoursSinceInstall

@@ -1,0 +1,53 @@
+@prefix fro:  <https://fleet.example.com/ontology#> .
+@prefix ata:  <https://fleet.example.com/id/ata/> .
+@prefix st:   <https://fleet.example.com/id/defect-status/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+#################################################################################################
+# Reference data: ATA chapters (iSpec 2200 numbering) grouped into system groups, and defect
+# statuses. Managed as SKOS so engineering can add chapters or sub-chapters without an
+# ontology change.
+#################################################################################################
+
+ata:scheme a skos:ConceptScheme ;
+    skos:prefLabel "ATA chapters"@en ;
+    skos:hasTopConcept ata:AFS, ata:STR, ata:PWR .
+
+# --- system groups (top concepts) ---
+ata:AFS a fro:AtaChapter ; fro:ataCode "AFS" ; skos:prefLabel "Airframe Systems"@en ; rdfs:label "Airframe Systems" ; skos:inScheme ata:scheme ; skos:topConceptOf ata:scheme .
+ata:STR a fro:AtaChapter ; fro:ataCode "STR" ; skos:prefLabel "Structures"@en ; rdfs:label "Structures" ; skos:inScheme ata:scheme ; skos:topConceptOf ata:scheme .
+ata:PWR a fro:AtaChapter ; fro:ataCode "PWR" ; skos:prefLabel "Power Plant"@en ; rdfs:label "Power Plant" ; skos:inScheme ata:scheme ; skos:topConceptOf ata:scheme .
+
+# --- chapters ---
+ata:21 a fro:AtaChapter ; fro:ataCode "21" ; skos:prefLabel "Air Conditioning"@en ; rdfs:label "ATA 21 Air Conditioning" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:22 a fro:AtaChapter ; fro:ataCode "22" ; skos:prefLabel "Auto Flight"@en ; rdfs:label "ATA 22 Auto Flight" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:23 a fro:AtaChapter ; fro:ataCode "23" ; skos:prefLabel "Communications"@en ; rdfs:label "ATA 23 Communications" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:24 a fro:AtaChapter ; fro:ataCode "24" ; skos:prefLabel "Electrical Power"@en ; rdfs:label "ATA 24 Electrical Power" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:25 a fro:AtaChapter ; fro:ataCode "25" ; skos:prefLabel "Equipment/Furnishings"@en ; rdfs:label "ATA 25 Equipment/Furnishings" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:26 a fro:AtaChapter ; fro:ataCode "26" ; skos:prefLabel "Fire Protection"@en ; rdfs:label "ATA 26 Fire Protection" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:27 a fro:AtaChapter ; fro:ataCode "27" ; skos:prefLabel "Flight Controls"@en ; rdfs:label "ATA 27 Flight Controls" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:28 a fro:AtaChapter ; fro:ataCode "28" ; skos:prefLabel "Fuel"@en ; rdfs:label "ATA 28 Fuel" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:29 a fro:AtaChapter ; fro:ataCode "29" ; skos:prefLabel "Hydraulic Power"@en ; rdfs:label "ATA 29 Hydraulic Power" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:30 a fro:AtaChapter ; fro:ataCode "30" ; skos:prefLabel "Ice and Rain Protection"@en ; rdfs:label "ATA 30 Ice and Rain Protection" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:31 a fro:AtaChapter ; fro:ataCode "31" ; skos:prefLabel "Indicating/Recording Systems"@en ; rdfs:label "ATA 31 Indicating/Recording Systems" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:32 a fro:AtaChapter ; fro:ataCode "32" ; skos:prefLabel "Landing Gear"@en ; rdfs:label "ATA 32 Landing Gear" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:33 a fro:AtaChapter ; fro:ataCode "33" ; skos:prefLabel "Lights"@en ; rdfs:label "ATA 33 Lights" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:34 a fro:AtaChapter ; fro:ataCode "34" ; skos:prefLabel "Navigation"@en ; rdfs:label "ATA 34 Navigation" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:35 a fro:AtaChapter ; fro:ataCode "35" ; skos:prefLabel "Oxygen"@en ; rdfs:label "ATA 35 Oxygen" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:36 a fro:AtaChapter ; fro:ataCode "36" ; skos:prefLabel "Pneumatic"@en ; rdfs:label "ATA 36 Pneumatic" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:38 a fro:AtaChapter ; fro:ataCode "38" ; skos:prefLabel "Water/Waste"@en ; rdfs:label "ATA 38 Water/Waste" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:49 a fro:AtaChapter ; fro:ataCode "49" ; skos:prefLabel "Airborne Auxiliary Power"@en ; rdfs:label "ATA 49 Airborne Auxiliary Power" ; skos:broader ata:AFS ; skos:inScheme ata:scheme .
+ata:52 a fro:AtaChapter ; fro:ataCode "52" ; skos:prefLabel "Doors"@en ; rdfs:label "ATA 52 Doors" ; skos:broader ata:STR ; skos:inScheme ata:scheme .
+ata:53 a fro:AtaChapter ; fro:ataCode "53" ; skos:prefLabel "Fuselage"@en ; rdfs:label "ATA 53 Fuselage" ; skos:broader ata:STR ; skos:inScheme ata:scheme .
+ata:56 a fro:AtaChapter ; fro:ataCode "56" ; skos:prefLabel "Windows"@en ; rdfs:label "ATA 56 Windows" ; skos:broader ata:STR ; skos:inScheme ata:scheme .
+ata:73 a fro:AtaChapter ; fro:ataCode "73" ; skos:prefLabel "Engine Fuel and Control"@en ; rdfs:label "ATA 73 Engine Fuel and Control" ; skos:broader ata:PWR ; skos:inScheme ata:scheme .
+ata:77 a fro:AtaChapter ; fro:ataCode "77" ; skos:prefLabel "Engine Indicating"@en ; rdfs:label "ATA 77 Engine Indicating" ; skos:broader ata:PWR ; skos:inScheme ata:scheme .
+ata:79 a fro:AtaChapter ; fro:ataCode "79" ; skos:prefLabel "Oil"@en ; rdfs:label "ATA 79 Oil" ; skos:broader ata:PWR ; skos:inScheme ata:scheme .
+ata:80 a fro:AtaChapter ; fro:ataCode "80" ; skos:prefLabel "Starting"@en ; rdfs:label "ATA 80 Starting" ; skos:broader ata:PWR ; skos:inScheme ata:scheme .
+
+# --- defect statuses ---
+st:scheme a skos:ConceptScheme ; skos:prefLabel "Defect status"@en .
+st:OPEN     a fro:DefectStatus ; skos:notation "OPEN"     ; skos:prefLabel "Open"@en     ; rdfs:label "Open"     ; skos:inScheme st:scheme .
+st:DEFERRED a fro:DefectStatus ; skos:notation "DEFERRED" ; skos:prefLabel "Deferred"@en ; rdfs:label "Deferred" ; skos:inScheme st:scheme .
+st:CLOSED   a fro:DefectStatus ; skos:notation "CLOSED"   ; skos:prefLabel "Closed"@en   ; rdfs:label "Closed"   ; skos:inScheme st:scheme .
